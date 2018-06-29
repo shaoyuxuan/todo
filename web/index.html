@@ -1,0 +1,354 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>无标题文档</title>
+<script src="js/jquery/2.0.0/jquery.min.js"></script>
+<link href="css/bootstrap/3.3.6/bootstrap.min.css" rel="stylesheet">
+<script src="js/jquery/2.0.0/jquery.min.js"></script>
+<script src="js/bootstrap/3.3.6/bootstrap.min.js"></script>
+
+<script src="js/jquery/2.0.0/jquery.js"></script>
+<style type="text/css">
+	#header{width:100%;}
+	#search1{float:center;}
+	#search2{float:left;width:80%;}
+	#body{width:100%;}
+	#body ul{list-style-type: none;}
+	#menu{float:left;width:20%;}
+	#body-right{float:right;width:80%;}
+	
+	.create1{height:500px;width:80%;}
+	#body-right{width:80%;float:left;}
+</style>
+<script type="text/javascript">
+	/*侧边导航清单与其内容的显现*/
+	$('#myTabs a').click(function (e) {
+  		e.preventDefault()
+  		$(this).tab('show')
+	})
+	
+	searchEvent() {
+      this.clearTimer();
+      if (this.searchKey && this.searchKey.length > 0) {
+        //获取当前延时函数的ID，便于后面clearTimeout清除该ID对应的延迟函数
+        this.timer = setTimeout(() => {
+          this.$emit('searchHandler', this.searchKey);
+        }, 500);
+      } else {
+        this.$emit('searchHandler', this.searchKey);
+      }
+}
+ 
+clearTimer() {
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
+}    
+
+	
+	
+	
+
+</script>
+</head>
+
+<body style="background-image: url(1.jpg);">
+	<div id="container">
+		<div id="header">
+			<button class="btn btn-default btn-lg">
+				<span class="glyphicon glyphicon-user"></span> User
+			</button>	
+			
+        	<!--注销-->
+        	 <button class="btn btn-default btn-lg" onclick="window.location.href='login.html'">
+				<span class="glyphicon glyphicon-log-out">注销</span> 
+			</button>	
+			
+		</div>
+		<div id="body">		
+				<div  id="menu">
+    				<ul  class="nav nav-pills nav-stacked" role="tablist">
+       					<li  role="presentation" class="active">
+       						<a href="#today"  aria-controls="today" role="tab" data-toggle="tab">
+          						<span class="glyphicon glyphicon-asterisk">
+          						我的一天</span>
+        					</a>	
+      					</li>
+       					<li role="presentation">
+       						<a href="#day2" aria-controls="day2" role="tab" data-toggle="tab">
+          						<span class="glyphicon glyphicon-edit">
+          						To-Do
+          						</span>
+        					</a>	
+      					</li>
+       					<li role="presentation">
+       						<a href="#homework" aria-controls="homework" role="tab" data-toggle="tab">
+          						<span class="glyphicon glyphicon-th-list">
+          						Web前端高级技术大作业
+          						</span>
+       						</a>     						
+       					</li>
+       					<li role="presentation">
+       						<a href="#addlist" aria-controls="addlist" role="tab" data-toggle="tab">
+          						<span class="glyphicon glyphicon-plus-sign">新建清单</span>
+        					</a>
+       					</li>
+    				</ul>
+    				 <div style="float: left;">
+		  				<table class="table table-hover text-center table-striped">
+							<template>
+							<tr  v-for="qingd,index in qingds" :key="index" @click="showlistid(qingd.qid)">
+								<td>{{ qingd.name }}</td>
+								<td><a href="#" @click="deleteqingd(index)">删除</a></td>
+							</tr>
+							<tr>
+					  			<td>
+						  			<input type="text" class="form-control" v-model="newlist.name" style="line-height: 40px;"/>
+					  			</td>
+					  			<td>
+						  			<button type="button" class="btn glyphicon glyphicon-plus" v-on:click="savelist"></button>
+					 		 	</td>
+							</tr> 
+							</template>
+						</table>
+           			</div> 
+           			
+ 				</div>
+ 				<div class="tab-content" id="body-right">
+						<div class="tab-pane fade in active"  role="tabpanel"  id="today">
+							
+						</div>
+						<div class="tab-pane fade"  role="tabpanel" id="day2">					
+							<div class="container1"> 
+    							<p v-show="remainTask.length>0">任务列表({{remainTask.length}})</p>
+    							<ul class="list-group">
+     					 			<template v-for="task in remainTask">
+        								<li class="list-group-item">
+          									<span @dblclick="editTask(task)" title="编辑任务">{{task.text}}</span>
+          									<button @click="removeTask(task)" title="移除任务">✗</button>
+          									<button @click="completeTask(task)" title="任务完成">✔</button>
+        								</li>
+      								</template>
+    							</ul>
+    							<form>
+       								<div class="form-group">
+        								<label for="exampleInputEmail1">任务描述</label>
+        								<input type="text" class="form-control" placeholder="请输入你要添加的任务" v-model="newTask" required>
+       								</div>
+       								<div class="form-group"> 
+         								<button class="btn btn-primary" type="submit" @click="addTask">添加任务</button>
+       								</div>
+								</form>
+    								<p>已完成的Task({{filterTask.length}})</p>
+     								<ol class="list-group">
+       									<template v-for="task in filterTask">
+         									<li class="list-group-item"> 
+           										{{task.text}}
+         									</li>
+       									</template>
+     								</ol>
+ 							</div>
+						</div>		
+						<div class="tab-pane fade"  role="tabpanel" id="homework">
+								
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>序号</th>
+												<th>任务名称</th>
+												<th>操作</th>
+											</tr>
+										</thead>
+										<tbody>
+											<template v-for="row,index in rows">
+												<tr>
+													<td>{{row.num}}</td>
+													<td>{{row.name}}</td>
+													<td>
+														<a href="#" @click="edit(row)">编辑</a>
+															&nbsp;&nbsp;
+														<a href="#" @click="deleteList(index)">删除</a>
+													</td>	
+												</tr>
+											</template>
+											<tr>
+												<td><input type="text" class="form-control" v-model="rowtemplate.num"></td>	
+												<td>
+													<input type="text" class="form-control" v-model="rowtemplate.name">
+												</td>
+												<td>
+													<button type="button" class="btn btn-default" @click="save">添加任务</button>
+												</td>	
+											</tr>
+										</tbody>
+									</table>
+    							
+						</div>
+						<div class="tab-pane fade"  role="tabpanel" id="addlist">
+							<div style="float: left;">
+								<table class="table table-hover text-center table-striped">
+				 					<template>
+										<tr  v-for=" task,index in tasks" :key="index" v-if="task.parid===currid">
+											<td>{{ task.name }}</td>
+											<td><a href="#" @click="deleterenwu(index)">删除</a><td>
+										</tr>
+										<tr>
+					  						<td>
+						  						<input type="text" class="form-control" v-model="newtask.name" style="line-height: 40px;"/>
+											</td>
+					  						<td>
+						  						<button type="button" class="btn glyphicon glyphicon-plus" v-on:click="savetask"></button>
+					  						</td>
+										</tr> 
+									</template>
+								</table>
+            				</div>
+						</div>
+						
+					</div>
+					
+				</div>
+		</div>
+</body>
+
+<script src="vue.js"></script>
+<script>
+			
+			 var data1 = {
+		 	currid:0,
+            qingds: [{ 
+						qid:1,
+						name:'操作系统',	
+					},{
+						qid:2,
+						name:'毛概作业',			
+					}],  
+            newlist:{qid: 0, name:''},
+			tasks: [
+            ],  
+            newtask:{tid: 0,parid:0, tname:''},
+			rows:[{
+						id:1,
+						num:1,
+						name:'web大作业1',
+					},{
+						id:2,
+						num:2,
+						name:'web大作业2',
+					},{
+						id:3,
+						num:3,
+						name:'web大作业3',
+					},{
+						id:4,
+						num:4,
+						name:'web期末大作业',
+					}],
+					rowtemplate:{id: 0,num:'',name: ''},
+				 tasks : [
+           { text : "开班会", complete:false },
+           { text : "操作系统作业", complete:false},
+           { text : "实验报告", complete:true},
+           { text : "学习javascript", complete:false},
+           { text : "JavaScript高级程序设计", complete:true}
+         ],
+         newTask:"" 
+				 
+		
+		
+	};
+        var vue = new Vue({
+            el : '#body', 
+            data : data1,
+            methods : {
+				deleteqingd:function(id){
+					this.qingds.splice(id,1);
+			},
+			deleterenwu:function(id){
+					this.tasks.splice(id,1);
+			},
+				save:function(event){
+					if(this.rowtemplate.id===0){
+						this.rowtemplate.id=this.rows.length+1;
+						this.rows.push(this.rowtemplate);
+					}
+					this.rowtemplate={id: 0,name: ''};
+				},
+				deleteList:function(id){
+					this.rows.splice(id,1);
+			},
+			edit:function(row)
+			{
+				this.rowtemplate=row;
+			},
+				addTask:function(event){ 
+           event.preventDefault();
+           this.tasks.push({
+             text: this.newTask,
+             complete: false
+           });
+           this.newTask = "";
+         },
+         editTask:function(task){ 
+           //移除当前点击task
+           this.removeTask(task);
+  
+           //更新vue实例中newTask值
+           this.newTask = task.text;
+         },
+         removeTask: function(task){
+           //指向Vue实例中的tasks
+           _tasks = this.tasks;
+           //remove
+           _tasks.forEach(function(item, index){
+             if(item.text == task.text){
+               _tasks.splice(index, 1);
+             }
+           })
+         },
+         completeTask: function(task){ //任务完成状态
+           task.complete = true; //设置任务完成的状态
+         },
+                savelist:function(event){
+                    if(this.newlist.qid===0){
+                        this.newlist.qid=this.qingds.length+1;
+                        this.qingds.push(this.newlist);
+                    }
+                    this.newlist={qid:0,name:''};
+                },
+				 savetask:function(event){
+                    if(this.newtask.tid===0){
+						this.newtask.parid=this.currid;
+                        this.newtask.tid=this.tasks.length+1;
+                        this.tasks.push(this.newtask);
+                    
+                    }
+                    this.newtask={tid:0,parid:0,tname:''};
+                },
+				showlistid:function(index){
+					this.currid=index;
+				}				
+            },
+			//用于计算属性，属性的计算是基于它的依赖缓存(如vue实例中的tasks) 
+       //只有当tasks数据变化时,才会重新取值
+			computed:{
+         remainTask:function(){ //筛选未完成的记录
+           return this.tasks.filter(function(task){ //filter过滤器
+             return !task.complete;
+           })
+         },
+         filterTask:function(){ //筛选已完成的记录
+           return this.tasks.filter(function(task){
+             return task.complete;
+           })
+         }
+		
+       }
+            });    
+			
+			
+	
+</script>
+				
+</html>
